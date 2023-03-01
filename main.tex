@@ -224,7 +224,7 @@ We overcome this limitation in \psfws by using measurements from a weather tower
 Since weather tower data are typically recorded every few minutes, the sampling times of the telemetry information can be matched to the GCM outputs used for the FA.
 The weather tower measurements are optional input to \psfws but highly recommended since the GL is of significant importance for the PSF, contributing between 40 and 60\% of the turbulence at many observatories \citep{tokovinin_model_2005, tokovinin_optical_2005, tokovinin_statistics_2003}.
 
-\subsection{Optical turbulence in \psfws}
+\subsection{Optical turbulence in \psfws}\label{sec:psfwsturb}
 Existing mesoscale models are successful at simulating optical turbulence around observatories \citep{masciadri_improvements_2001, masciadri_optical_2017}; however, such models are computationally prohibitive when many realizations need to be simulated. 
 Useful parameterizations of optical turbulence as a function of environmental quantities -- such as temperature, pressure, wind, and kinetic energy -- can be adapted from this literature, however, as is done in \osborn.
 In particular, \osborn approximate wind shear as the sole contributor to the kinetic energy term (\ie wind shear sources turbulent mixing of air) and replace the temperature and pressure profiles from mesoscale simulations with GCM data.
@@ -239,24 +239,25 @@ MASS-DIMM measurements of atmospheric turbulence at a variety of sites show that
 Motivated by this independence, the turbulence in GL and FA layers are treated separately in \psfws.
 The relative turbulence within the FA layers is calculated with GCM data and \osborn, and the total GL and FA integrals are drawn from log-normal distributions fit to published quantiles of measurements of $J_{\rm GL}$ and $J_{\rm FA}$.
 
-In \figref{inputs} we visualize the steps taken in \psfws to go from raw GCM data to simulation-ready parameters.
-We use Gemini-South at Cerro Pachón as an example observatory,
-\ie we supply \psfws with telemetry from the weather tower at Gemini-S, ECMWF ERA5 data (the closest grid point to Cerra Pachón, at -30.2407, -70.7366, is $\sim 1.9\unit{km}$ away at -30.25, -70.75.), and an empirical MASS+DIMM turbulence PDF fit to data from \citep{tokovinin_model_2005}. 
+In \figref{inputs} we visualize the steps taken from raw GCM data to simulation-ready parameters in \psfws, with Gemini-South as an example site.
+Our data sources are ground layer telemetry from the weather tower at Gemini-S, ECMWF ERA5 data\footnote{The closest grid point to Cerra Pachón, at -30.241, -70.737, is $\sim 1.9\unit{km}$ away at -30.25, -70.75.}, and empirical MASS+DIMM turbulence PDFs fit to FA and GL data from \citep{tokovinin_model_2005}. 
+The top two rows of the figure show six months of site telemetry and GCM measurements -- temporal matching of the datasets is only depicted for a randomly chosen timestamp shown in bold; however, each GCM altitude profile in purple has a single co-temporal ground layer datapoint in orange.
+Particularly noteworthy is the distinctly non-uniform distribution of wind directions, both at ground and across most altitudes -- see histograms in the right column for data density.
 
-Top two rows show the GCM and site telemetry measurements (temporal matching not shown), each line are the values across altitude for one time.
-Notice very peaked distribution of wind directions, both at ground an across most altitudes (histograms show density).
-Line in bold is a randomly chosen example datapoint that we use throughout the paper to illustrate our process.
-Bottom panel in pale is uncalibrated \osborn output; in dark is after applying the randomly chosen $F_{FA}$ calibration.
-Atmosphere is divided into N=6 layers here, points show the integrated turbulence strength (scaled by layer width for visualization) with the GL value drawn from distribution and FA ones integrated.
-With these screen altitudes, we would then sample from the wind curve shown in top plots, and our parameters are ready.
+The randomly chosen example, in bold, will serve to illustrate our process throughout this and the following sections.
+For instance, the \osborn output for this data is shown in purple lines in the bottom panel of \figref{inputs}, pale is uncalibrated and dark is after applying the randomly chosen $J_{\rm FA}$ calibration.
+We choose to calculate turbulence integrals for N=6 atmosphere layers; the \psfws default is to create one layer for the ground, and divide the free atmosphere equally into $N-1$. 
+This is meant to allow flexibility in the number and altitude of turbulence layers, which as seen in SCIDAR data are not fixed in time (\osborn).
+The boundaries between these 6 layers are shown in purple dashed vertical lines (the ground altitude is shown in orange dashed).
+Turbulence integrals are shown scaled by layer width for visualization, and placed at the default phase screen altitudes, \ie the $C_n^2$ center of mass within each FA layer and the middle of the GL.
+The set of parameters $p_{\rm psfws}$ returned by \psfws is complete once we interpolate the wind speed $v$ and direction $\phi$ profiles to the phase screen altitudes $h$: $p_{\rm psfws} = \{J, h, v(h), \phi(h)\}$
 
 \begin{figure}
-\includegraphics[width=0.475\textwidth]{inputs.png}
+\includegraphics[width=0.47\textwidth]{inputs.png}
 \caption{
     Six months of wind data at and above Cerro Pach\'on (05/01/2019 to 11/01/2019), processed with \psfws as described in \secref{psfws}.
     We plot wind speed (top) and meteorological direction (direction of wind \textsl{origin}; middle) as a function of altitude, or as a frequency distribution on the right. 
     Weather tower measurements of the ground layer (at an altitude of 50\unit{m}) are shown in orange; ECMWF ERA5 forecasts for the free atmosphere are shown in purple.
-    Temporal matching of the datasets is not depicted; however, each altitude profile in purple has a single co-temporal orange datapoint.
     The heavy purple line in each panel corresponds to data from the same random timestamp.
     In the bottom panel, the uncalibrated $C_n^2(h)$ profile for this example time is shown in light purple; scaled by $J_{FA}$, the calibrated profile is in dark purple. 
     The dashed vertical lines depict the boundaries between the altitude bins used to calculate turbulence integrals $J$ for each FA phase screen.
@@ -265,40 +266,49 @@ With these screen altitudes, we would then sample from the wind curve shown in t
     }
 \end{figure}
 
-This is not an optimal solution, since the values aren't temporally correlated with other parameters. 
-We include a method to correlate GL seeing draws with ground wind speed, but the evidence is mixed for whether this is the case, and there's no evidence of FA seeing being correlated to higher altitude wind speed (and the model already includes dependence on wind shear). 
-Nevertheless, this random draw from empirical distributions of seeing does restrict the predictive capabilities of \psfws. 
+Using random draws from turbulence distributions for ground turbulence integrals and calibration of FA $C_n^2$ is not an optimal solution since these values aren't temporally correlated with other environment parameters. 
+There is currently mixed observational evidence for whether a correlation exists between ground wind speed and $J_{\rm GL}$, so while we include in \psfws an option to correlate the random $J_{\rm GL}$ draws with ground wind speed it is by default correlation set to zero.
 % Also some evidence for dependence of seeing on wind direction
-
-Turbulence layers are not fixed in altitude or number (cite Osborn SCIDAR paper) so we want these to vary in our outputs as well.
-\psfws can output parameters for any number of phase screens, default is one for GL and separate FA equally into N layers. 
-Phase screen altitude will be placed at the cn2 center of mass within the layer boundaries.
+There's no evidence of correlation between $J_{\rm FA}$ and FA wind speeds -- and the model already includes dependence on wind shear -- so we have no analogous option in this regime. 
+This method of using random draws from empirical distributions does somewhat restrict the predictive capabilities of simulations run with \psfws, as we do not expect to recover the seeing on individual nights; however, we expect to recover overall seeing statistics as well as spatial correlations of the PSFs. 
 
 \section{Validation} \label{sec:valid}
-The package described above draws from multiple sources of telemetry and vetted models. 
-How do simulations run with \psfws vary from the previous generation of atmospheric PSF simulations? 
-How do simulations run with \psfws compare to atmospheric PSFs osbserved at a survey telescope?
-The section below addressed some of these questions, with simulations run as in \FIXME{cite DC2 paper} in \secref{imsimcompare} and with DES (optics-model subtracted) data in \secref{descompare}.
+\psfws uses multiple sources of telemetry and vetted models to generate sets of correlated parameters for PSF simulations.
+In this section, we describe validation tests of these generated parameters.
+These tests aim to answer the following: how simulations run with \psfws parameters vary from the previous generation of atmospheric PSF simulations (\secref{imsimcompare}), and how simulations run with \psfws parameters compare to atmospheric PSFs as measured with a survey telescope (\secref{descompare}).
+
+\subsection{Simulations at Cerro Pach\'on}\label{sec:imsimcompare}
+The first validation study compared atmospheric PSF simulations for Rubin run with input parameters set in three different ways.
+In the first condition, parameters are generated for Cerro Pachón using \psfws and the data summarized in \figref{inputs}.
+The simulated PSF from one of these parameter sets (the example discussed in \secref{psfwsturb}) is displayed in \figref{output}; the spatial dependence of the PSF parameters across the field of view is clearly anisotropic. 
 
 \begin{figure}
 \includegraphics[width=0.47\textwidth]{example_output.png}
-\caption{
+\caption{Left: map of PSF size variation, and right: whisker plot of ellipticity, on a 3.5\unit{deg^2} field.
+This PSF simulation was run with the \psfws parameters in bold from \figref{inputs}.
     \label{fig:output}
     }
 \end{figure}
 
-\subsection{Simulations at Cerro Pachon}\label{sec:imsimcompare}
-How do simulations run with psfws inputs differ from those run with random inputs?
+As a benchmark we use the simulation parameters used in the DESC Data Challenge 2 (DC2) image simulations \citep{the_lsst_dark_energy_science_collaboration_lsst_2021} as the second simulation condition.
+For each of N=6 phase screens, wind speed and direction are drawn from uniform distributions between 0-20\unit{m/s} and 0-360\degree, respectively.
+Small Gaussian variations around the turbulence integrals from \cite{ellerbroek_efficient_2002} are introduced, but the associated 6 altitudes remain fixed between simulations.
 
-Comparison simulations are inputs from relevant literature: DC2 atmospheric simulations \FIXME{cite DC2 paper}: random distributions, variation on Ellerbroek.
-Two variations on these: speeds as described in paper, and speeds matched to the limits of the data used for psfws as described above.
+We label these first two conditions as \textsl{psfws} and \textsl{rand}.
+We wanted to identify whether the differences between these two conditions are mainly driven by the highly correlated wind directions in \textsl{psfws}.
+The third parameter condition was meant to address this question: \textsl{randMatch} is identical to \textsl{rand} except we draw wind directions from \psfws for the 6 fixed layers.
 
-Simulations are run as follows:
-pair (triplet?) of simulations use same seeing and atmospheric seed (ie turbulence generated is the same), same number of layers (set by imsim) and.... \CHECK{anything else?}
+Simulations are run from the three conditions as follows: a set of three 30\unit{s} exposure is simulated, using each of the environmental conditions, from 150 different starting points, \ie, a set of phase screens with some given turbulence structure. 
+Each triplet of simulations has the same outer scale (drawn from a truncated log normal with median of $25\unit{m}$) and the same seeing (drawn uniformly from 0.6 to 1.6\asec); the fraction of this value contributed by each phase screen varies according to the turbulence integrals. 
+To compare only the effect due to the difference in environmental parameters, the \textsl{psfws} simulations are also run with $N=6$ phase screens, but their altitudes are allowed to vary according to the $C_n^2$ scheme described in \secref{psfwsturb}.
+
+\subsection{Simulation comparison results}\label{sec:imsimresults}
 We don't expect anything from pairwise comparison of simulations, since we are interested in the comparison between the statistics of spatial correlations between the three sets of simulations.
+To run comparison, compute the anisotropic 2pcf map of each PSF parameter (size, shape). 
+The average over the ensemble of simulations can tell us about dominant anisotropies -- see \figref{pcfslices}.
 
-To run comparison, compute moments of the anisotropic 2pcf maps of PSF parameters (size, shape). 
-We use the following quantities to summarize each simulation result: the variance of the PSF parameter across the field of view, the "size" of the 2pcf ("correlation length"), and the "direction" of the 2pcf. 
+We also want to understand how the simulated PSF patterns relate to the input parameters for each simulation.
+To summarize the anisotropic 2pcf of each simulation, we extract a dominant direction: slice and max, see \figref{pcfslices} for example.
 
 \begin{figure}
 \includegraphics[width=0.47\textwidth]{2pcf_to_slice_02.png}
@@ -307,12 +317,16 @@ We use the following quantities to summarize each simulation result: the varianc
     }
 \end{figure}
 
+Results of correlating to input wind directions and speeds summarized in the nonexistant figures. 
+
 \subsection{Data from Cerro Telolo} \label{sec:descompare}
 How do simulations run with psfws at Cerro Telolo compare to DES optics-removed data?
 coordinate swap between atm and \galsim
 
+\subsection{Data comparison results} \label{sec:desresults}
 
 \section{Conclusion}
+
 \begin{itemize}
     \item configuration details in github repo
     \item flexible model for simulation parameter generation -- code to download and format additional GCM data from either ECMWF or NOAA is included with the package; can do this for any location and duration (starting from...?). 
