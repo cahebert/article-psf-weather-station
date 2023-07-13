@@ -1,0 +1,4 @@
+./data/*
+./scripts/*.sl
+./__pycache__/
+
