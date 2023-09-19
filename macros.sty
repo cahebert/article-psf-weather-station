@@ -24,13 +24,34 @@
 \usepackage{amsmath}
 \usepackage{xspace}
 \usepackage{xcolor}
-% \usepackage{subfig}
-
-%\usepackage[titletoc,toc,title]{appendix}
-% Added by me
+\usepackage{multirow}
+\usepackage{makecell}
 \usepackage{enumitem}
-%\usepackage{titlesec}
-%\titleformat{\section}[hang]{\bfseries}{Item \thesection:\ }{0pt}{}
+
+% Useful atmospheric PSF commands - C-A Hebert
+\newcommand{\xim}{\ensuremath{\xi_{-}(\theta,\alpha)}\xspace}
+\newcommand{\xip}{\ensuremath{\xi_{+}(\theta,\alpha)}\xspace}
+\newcommand{\bench}{\textsc{bench}\xspace}
+\newcommand{\match}{\textsc{match}\xspace}
+\newcommand{\psfwssims}{\textsc{psfws}\xspace}
+\newcommand{\psfws}{\textsc{psf-weather-station}\xspace}
+\newcommand{\Rey}{\mbox{\textit{Re}}}
+\newcommand{\Lnot}{\ensuremath{\mathcal{L}_0}\xspace}
+\newcommand{\vonkarman}{von K\'arm\'an\xspace}
+\newcommand{\galsim}{\textsc{GalSim}\xspace}
+\newcommand{\vk}{von K\'arm\'an\xspace}
+\newcommand{\cp}{Cerro Pach\'on\xspace}
+\newcommand{\smallsep}{separations of $\sim\,$1\amin\xspace}
+\newcommand{\largesep}{separations of $\sim\,$100\amin\xspace}
+\newcommand{\dcii}{DESC-DC2Sims\xspace}
+\newcommand{\osborn}{OS18\xspace}
+
+%% can I set up colors?
+\definecolor{psfws}{HTML}{C83E4D}
+\definecolor{bench}{HTML}{5A7FAF}
+\definecolor{match}{HTML}{d8973c}
+
+%%%
 
 
 % General formatting
@@ -70,8 +91,7 @@
 \newcommand{\code}[1]{\texttt{#1}\xspace}
 \newcommand{\dd}{\ensuremath{\rm d}}
 \newcommand{\var}[1]{\ensuremath{#1}\xspace}
-\newcommand{\Rey}{\mbox{\textit{Re}}}
-\newcommand{\Lnot}{\ensuremath{\mathcal{L}_0}\xspace}
+
 
 % Referencing
 \newcommand{\chapref}[1]{Chapter~\ref{chap:#1}}
