@@ -42,8 +42,12 @@ if __name__ == '__main__':
         summary = pickle.load(open(psf_path, 'rb'))
         summary = pd.DataFrame([d for k, d in summary.items()], index=summary.keys())
         variances = summary.sort_index()['autocorr_e1']
+        psf_path = pathlib.Path.joinpath(summaries, f'shearMinus_polarSummary_{kind}.p')
+        summary = pickle.load(open(psf_path, 'rb'))
+        summary = pd.DataFrame([d for k, d in summary.items()], index=summary.keys())
+        variances += summary.sort_index()['autocorr_e2']
 
-        ylims = [5e-6, 4e-3]
+        ylims = [1e-5, 4e-3]
         bins = np.logspace(np.log10(ylims[0]), np.log10(ylims[1]), 15)
 
         # scatter
@@ -55,7 +59,7 @@ if __name__ == '__main__':
                     orientation='horizontal', label=l, lw=1.25)
 
         a[kind[0]].grid(zorder=2, alpha=0.75, lw=0.5)
-        a[kind[0]].text(.25, .0000125, l, fontsize='large')
+        a[kind[0]].text(.25, .000025, l, fontsize='large')
 
     a['h'].legend(handlelength=1, bbox_to_anchor=(0.2, 1), loc='upper left')
     a['p'].set_yscale('log')
@@ -64,7 +68,7 @@ if __name__ == '__main__':
     [a[k].set_xscale('log') for k in ['p', 'm', 'r']]
     [a[k].set_xlim([2e-1, 25]) for k in ['p', 'r', 'm']]
 
-    a['p'].set_ylabel(r'Var(e$_1$)')
+    a['p'].set_ylabel(r'Var(e)')
     a['r'].set_xlabel(r'$v$(GL) (m/s)')
     a['h'].set_xlabel('\# of simulations')
 

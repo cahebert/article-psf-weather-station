@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import common
 import plotHelp
 import pickle
+import seaborn as sns
 
 plt.style.use(f'./paper.mplstyle')
 colors = common.color_scheme()
@@ -53,12 +54,19 @@ if __name__ == '__main__':
     f.set_tight_layout(False)
 
     # plot ellipticity over FOV
-    vmax = np.max(e)
+    display = np.random.choice(range(50000), 20000)
+    e = np.hypot(d['e1'], d['e2'])[display]
+    beta = 0.5*np.arctan2(d['e2'], d['e1'])[display]
+    dx = e*np.cos(beta)
+    dy = e*np.sin(beta)
+
     qdict = dict(alpha=1, angles='uv', headlength=0, headwidth=0, headaxislength=0,
-                 minlength=0, pivot='middle', width=0.0025, cmap=colors.pCmap)
-    q = a['shape'].quiver(thx, thy, dx, dy, e, scale=1, **qdict)
-    q.set_clim(vmin=0, vmax=vmax)
-    cb = plt.colorbar(q, cax=a['sc'], label=r'$|e|$')
+                 minlength=0, pivot='middle', width=0.002, color=sns.color_palette("Purples")[-1])
+    q = a['shape'].quiver(thx[display], thy[display], dx, dy, scale=1, **qdict)
+    a['shape'].quiverkey(q, 160, -10, 0.03, r'$e$ = 0.03', coordinates='data', labelpos='N')
+
+    a['sc'].clear()
+    a['sc'].axis('off')
 
     a['shape'].set_xlabel(r'$\theta_x$ (arcmin)', labelpad=-.25)
     a['shape'].set_ylabel(r'$\theta_y$ (arcmin)')

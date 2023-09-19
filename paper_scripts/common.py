@@ -35,7 +35,7 @@ def markers():
 
 
 def seed():
-    return 368
+    return 287
 
 
 def open_example():

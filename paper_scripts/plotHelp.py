@@ -59,13 +59,18 @@ def arrange2pcf(coord, img, size='big'):
     return alphas, thetas, img
 
 
-def make_h_cbar(ax, maple, label):
+def make_h_cbar(ax, maple, label, orientation='h'):
     divider = make_axes_locatable(ax)
-    ax_cb = divider.append_axes("top", size="5%", pad="15%")
-    cbar = plt.colorbar(maple, cax=ax_cb, orientation='horizontal')
-    cbar.set_label(label=label)
-    ax_cb.xaxis.set_label_position("top")
-    return
+    if orientation=='h':
+        ax_cb = divider.append_axes("top", size="5%", pad="15%")
+        cbar = plt.colorbar(maple, cax=ax_cb, orientation='horizontal')
+        cbar.set_label(label=label)
+        ax_cb.xaxis.set_label_position("top")
+    else:
+        ax_cb = divider.append_axes("right", size="5%", pad="10%")
+        cbar = plt.colorbar(maple, cax=ax_cb)
+        cbar.set_label(label=label)       
+    return ax_cb
 
 
 def getImgs(kind, psfparam, sum_path, size='big'):

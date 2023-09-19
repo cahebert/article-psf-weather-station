@@ -173,7 +173,7 @@ if __name__ == '__main__':
     if args.kind not in ['psfws', 'rand', 'match']:
         raise ValueError('kind input must be "psfws", "rand", "match"')
 
-    N = range(538)
+    N = range(1,532)
 
     size_sum, shearP_sum, shearM_sum, images = {}, {}, {}, {}
 

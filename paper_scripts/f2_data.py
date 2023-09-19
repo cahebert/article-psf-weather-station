@@ -31,6 +31,7 @@ if __name__ == '__main__':
     afah = [f.add_subplot(gs[i, 1]) for i in [1, 2]]
 
     d = common.open_example()
+    s = common.seed()
     seed = d['args'].atmSeed
     ws = psfws.ParameterGenerator(seed=seed)
 
@@ -55,7 +56,7 @@ if __name__ == '__main__':
         af.plot(ws.h[ws.fa_start:], ws.data_fa.at[example, col][ws.fa_start:],
                 color=colors.fa_accent)
         # plot GL points
-        af.plot(np.ones(538)*ws.h0, ws.data_gl[col], 'o',
+        af.plot(np.ones(len(ws.data_gl))*ws.h0, ws.data_gl[col], 'o',
                 ms=plt.rcParams['lines.markersize']-2, color=colors.gl, alpha=0.2)
         # plot GL example point
         af.plot(ws.h0, ws.data_gl.at[example, col], 'o', color=colors.gl_accent,
@@ -64,9 +65,11 @@ if __name__ == '__main__':
         # histogram projections
         ah.hist(ws.data_gl[col], bins=bins[col], color=colors.gl, histtype='step',
                 lw=plt.rcParams['lines.linewidth']*1.5, orientation='horizontal')
+
+        w = np.ones(len(ws.data_fa)*80) / 80  # 80 is the number of altitude samples
         ah.hist(np.concatenate(ws.data_fa[col]), bins=bins[col], histtype='step',
                 lw=plt.rcParams['lines.linewidth']*1.5, color=colors.fa,
-                orientation='horizontal', weights=np.ones(538*69)/69)
+                orientation='horizontal', weights=w)
 
     # labels
     afa[0].set_ylabel(r'$v$ (m/s)')
@@ -97,7 +100,7 @@ if __name__ == '__main__':
 
     at.plot(h_screens[1:], j[1:] / 1e3 / (h_screens[-1]-h_screens[-2]),
             'o', color=colors.fa_accent, ms=plt.rcParams['lines.markersize']-1)
-    at.plot(h_screens[0] + 0.4, j[0] / 1e3 / (h_screens[1]-h_screens[0]),
+    at.plot(h_screens[0] + 0.2, j[0] / 1e3 / (h_screens[1]-h_screens[0]),
             'o', color=colors.gl, ms=plt.rcParams['lines.markersize']-1)
 
     at.set_yscale('log')

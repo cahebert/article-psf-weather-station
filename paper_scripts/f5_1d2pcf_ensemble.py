@@ -43,9 +43,9 @@ if __name__ == '__main__':
         xplot = bins[xcp] * 60
 
         for r, stack in zip(['p', 'm', 's'], [Pstack, Mstack, Sstack]):
-            if r == 's':
-                # convert size to arcsec from pixels
-                stack = np.array(stack) * (0.2)**2
+            # if r == 's':
+            #     # convert size to arcsec from pixels
+            #     stack = np.array(stack) * (0.2)**2
             # get and plot 2pcf quantile values
             xi25th, xi50th, xi75th = np.quantile(stack, [0.25, 0.50, 0.75], axis=0)
             a[r].plot(xplot, xi50th[xcp], color=c, label=l, zorder=2, lw=1.25, ls=ls)
